@@ -68,7 +68,7 @@ public class TaskManager {
         System.out.println("Добавлена подзадача: " + idCounter);
         getNextId();
         epics.get(subtask.getEpicId()).addSubtaskInEpic(subtask.getId());
-        updateEpic(epics.get(subtask.getEpicId()));                                           //обновить статут эпика
+        updateEpic(epics.get(subtask.getEpicId()));
         return subtask;
     }
 
@@ -81,7 +81,7 @@ public class TaskManager {
         updateEpic(epics.get(subtasks.get(id).getEpicId()));
         subtasks.remove(id);
         System.out.println("Подзадача удалена!");
-                                                                            //  обновить статут эпика
+
     }
 
     public void removeAllSubtasks() {
@@ -91,7 +91,7 @@ public class TaskManager {
             epics.get(subtasks.get(subtask.getId()).getEpicId()).removeAllSubTasks();
         }
         subtasks.clear();
-        System.out.println("Все подзадачи удалены!");              // обновить статусы эпиков
+        System.out.println("Все подзадачи удалены!");
     }
 
     public void updateSubTask(Subtask subtask) {
@@ -102,7 +102,7 @@ public class TaskManager {
         }
         subtasks.put(subtask.getId(), subtask);
         updateEpic(epics.get(subtask.getEpicId()));
-                                                                         // обновить статус эпика
+
     }
 
     public Epic addEpic(Epic epic) {
