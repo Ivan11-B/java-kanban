@@ -1,53 +1,62 @@
+package main.java.tasks;
+
 import java.util.Objects;
 
 public class Task {
     private String name;
     private String description;
-    private int idTask;
-    private StatusTask statusTask;
+    private Integer id;
+    private TaskStatus status;
 
-    public Task(String name, String description, StatusTask statusTask) {
+    public Task(String name, String description, TaskStatus status) {
         this.name = name;
         this.description = description;
-        this.statusTask = statusTask;
+        this.status = status;
     }
 
     public void setName(String name) {
+
         this.name = name;
     }
 
     public String getName() {
+
         return name;
     }
 
     public void setDescription(String description) {
+
         this.description = description;
     }
 
     public String getDescription() {
+
         return description;
     }
 
-    public void setIdTask(int idTask) {
-        this.idTask = idTask;
+    public Integer getId() {
+        return id;
     }
 
-    public int getIdTask() {
-        return idTask;
+    public void setId(Integer id) {
+
+        this.id = id;
     }
 
-    public void setStatusTask(StatusTask statusTask) {
-        this.statusTask = statusTask;
+    public void setStatus(TaskStatus status) {
+
+        this.status = status;
     }
 
-    public StatusTask getStatusTask() {
-        return statusTask;
+    public TaskStatus getStatus() {
+
+        return status;
     }
 
-    public void update(String name, String description, StatusTask statusTask) {
+    public void update(String name, String description, TaskStatus taskStatus) {
         this.name = name;
         this.description = description;
-        this.statusTask = statusTask;
+        this.status = taskStatus;
     }
 
     @Override
@@ -57,12 +66,13 @@ public class Task {
         Task task = (Task) o;
         return Objects.equals(name, task.name) &&
                 Objects.equals(description, task.description) &&
-                statusTask == task.statusTask;
+                Objects.equals(id, task.id) &&
+                status == task.status;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, description, idTask, statusTask);
+        return Objects.hash(name, description, id, status);
     }
 
     @Override
@@ -70,8 +80,8 @@ public class Task {
         return "Task{" +
                 "name='" + name + '\'' +
                 ", description='" + description + '\'' +
-                ", idTask=" + idTask +
-                ", statusTask=" + statusTask +
+                ", id=" + id +
+                ", status=" + status +
                 '}' + "\n";
     }
 }
