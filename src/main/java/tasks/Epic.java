@@ -32,7 +32,7 @@ public class Epic extends Task {
         subtaskId.clear();
     }
 
-    public ArrayList<Integer> getSubTask(int id) {
+    public ArrayList<Integer> getSubtaskIds() {
         return subtaskId;
     }
 

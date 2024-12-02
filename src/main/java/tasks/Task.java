@@ -53,21 +53,13 @@ public class Task {
         return status;
     }
 
-    public void update(String name, String description, TaskStatus taskStatus) {
-        this.name = name;
-        this.description = description;
-        this.status = taskStatus;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Task task = (Task) o;
-        return Objects.equals(name, task.name) &&
-                Objects.equals(description, task.description) &&
-                Objects.equals(id, task.id) &&
-                status == task.status;
+        return Objects.equals(id, task.id);
+
     }
 
     @Override
