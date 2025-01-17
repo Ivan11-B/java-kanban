@@ -1,13 +1,14 @@
 package main;
 
-import main.java.manager.InMemoryHistoryManager;
-import main.java.manager.InMemoryTaskManager;
-import main.java.manager.Managers;
-import main.java.manager.TaskManager;
+import main.java.manager.*;
 import main.java.tasks.Epic;
 import main.java.tasks.Subtask;
 import main.java.tasks.Task;
 import main.java.tasks.TaskStatus;
+
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 
 public class Main {
 
@@ -23,18 +24,38 @@ public class Main {
         taskManager.addEpic(epic1);
         Subtask subtask1 = new Subtask("Подзадача1", "Описание1", TaskStatus.NEW, 3 );
         Subtask subtask2 = new Subtask("Подзадача2", "Описание2", TaskStatus.NEW, 3 );
+        Subtask subtask3 = new Subtask("Подзадача3", "Описание3", TaskStatus.NEW, 3 );
         taskManager.addSubtask(subtask1);
         taskManager.addSubtask(subtask2);
+        taskManager.addSubtask(subtask3);
         Epic epic2 = new Epic("Эпик2" , "Описание2");
         taskManager.addEpic(epic2);
-        Subtask subtask3 = new Subtask("Подзадача3", "Описание3", TaskStatus.NEW, 6 );
-        taskManager.addSubtask(subtask3);
 
-        taskManager.getTaskById(1);
         taskManager.getTaskById(2);
+        taskManager.getSubTaskById(5);
+        taskManager.getEpicById(7);
+        taskManager.getTaskById(1);
         taskManager.getSubTaskById(4);
+        taskManager.getSubTaskById(6);
         taskManager.getEpicById(3);
         taskManager.getTaskById(1);
+        taskManager.getSubTaskById(5);
+        taskManager.getTaskById(2);
+        taskManager.getTaskById(2);
+        System.out.println(taskManager.getHistory());
+        System.out.println("_".repeat(20));
+
+        taskManager.removeTask(1);
+        System.out.println(taskManager.getHistory());
+        System.out.println("_".repeat(20));
+
+        taskManager.removeSubtask(5);
+        System.out.println(taskManager.getHistory());
+        System.out.println("_".repeat(20));
+
+        taskManager.removeEpic(3);
+        System.out.println(taskManager.getHistory());
+        System.out.println("_".repeat(20));
 
         printAllTasks(taskManager);
 

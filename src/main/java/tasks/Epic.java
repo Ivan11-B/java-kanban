@@ -9,6 +9,10 @@ public class Epic extends Task {
         super(name, description, TaskStatus.NEW);
         this.subtaskId = new ArrayList<>();
     }
+    public Epic(Epic epic) {
+        super(epic.getName(), epic.getDescription(), TaskStatus.NEW);
+        this.subtaskId = epic.getSubtaskId();
+    }
 
     public ArrayList<Integer> getSubtaskId() {
         return subtaskId;
@@ -30,10 +34,6 @@ public class Epic extends Task {
     }
     public void removeAllSubTasks() {
         subtaskId.clear();
-    }
-
-    public ArrayList<Integer> getSubtaskIds() {
-        return subtaskId;
     }
 
     @Override
