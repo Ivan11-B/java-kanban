@@ -203,7 +203,8 @@ public class InMemoryTaskManager implements TaskManager {
             currentEpic.setDescription(epic.getDescription());
             epics.put(epic.getId(), currentEpic);
             return epic;
-        } return null;
+        }
+        return null;
     }
 
     private void updateEpicStatus(Epic epic) {
