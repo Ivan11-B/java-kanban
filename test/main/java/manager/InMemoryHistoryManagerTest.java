@@ -6,8 +6,6 @@ import main.java.tasks.Task;
 import main.java.tasks.TaskStatus;
 import org.junit.jupiter.api.Test;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
