@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.util.List;
 
-public class InMemoryHistoryManager implements HistoryManager{
+public class InMemoryHistoryManager implements HistoryManager {
     private Node head;
     private Node last;
     private final Map<Integer, Node> history = new HashMap<>();
@@ -81,7 +81,7 @@ public class InMemoryHistoryManager implements HistoryManager{
         }
     }
 
-    private static class Node{
+    private static class Node {
         Task item;
         Node next;
         Node prev;
