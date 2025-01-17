@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+
 class InMemoryTaskManagerTest {
     TaskManager taskManager;
 
@@ -43,7 +44,7 @@ class InMemoryTaskManagerTest {
 
         Task createdTask = taskManager.getTaskById(taskId);
 
-        Assertions.assertEquals(task,createdTask);
+        Assertions.assertEquals(task, createdTask);
 
     }
 
@@ -54,7 +55,7 @@ class InMemoryTaskManagerTest {
         TaskStatus status = TaskStatus.NEW;
         Epic epic = new Epic("Эпик", "Описание");
         taskManager.addEpic(epic);
-        Subtask subtask = new Subtask(name, description, status,1);
+        Subtask subtask = new Subtask(name, description, status, 1);
 
         Subtask createdSubtask = taskManager.addSubtask(subtask);
 
@@ -74,7 +75,7 @@ class InMemoryTaskManagerTest {
 
         Subtask createdSubtask = taskManager.getSubTaskById(subtaskId);
 
-        Assertions.assertEquals(subtask,createdSubtask);
+        Assertions.assertEquals(subtask, createdSubtask);
     }
 
     @Test
