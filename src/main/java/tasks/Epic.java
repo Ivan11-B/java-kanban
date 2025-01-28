@@ -10,6 +10,11 @@ public class Epic extends Task {
         this.subtaskId = new ArrayList<>();
     }
 
+    public Epic(Epic epic) {
+        super(epic.getName(), epic.getDescription(), TaskStatus.NEW);
+        this.subtaskId = epic.getSubtaskId();
+    }
+
     public ArrayList<Integer> getSubtaskId() {
         return subtaskId;
     }
@@ -21,6 +26,7 @@ public class Epic extends Task {
             System.out.println("Задача уже существует!");
         }
     }
+
     public void removeSubTask(Integer id) {
         if (subtaskId.contains(id)) {
             subtaskId.remove(id);
@@ -28,12 +34,9 @@ public class Epic extends Task {
             System.out.println("Задача не найдена!");
         }
     }
+
     public void removeAllSubTasks() {
         subtaskId.clear();
-    }
-
-    public ArrayList<Integer> getSubtaskIds() {
-        return subtaskId;
     }
 
     @Override
@@ -45,7 +48,7 @@ public class Epic extends Task {
                 ", status=" + getStatus() + "," +
                 "\n" +
                 "subtasks=" + subtaskId +
-                "\n"+
+                "\n" +
                 '}';
     }
 }

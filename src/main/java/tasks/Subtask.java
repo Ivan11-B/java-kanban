@@ -3,9 +3,14 @@ package main.java.tasks;
 public class Subtask extends Task {
     private Integer epicId;
 
-    public Subtask(String name, String description, TaskStatus taskStatus, Integer EpicId) {
+    public Subtask(String name, String description, TaskStatus taskStatus, Integer epicId) {
         super(name, description, taskStatus);
-        this.epicId = EpicId;
+        this.epicId = epicId;
+    }
+
+    public Subtask(Subtask subtask) {
+        super(subtask);
+        this.epicId = subtask.epicId;
     }
 
     public Integer getEpicId() {

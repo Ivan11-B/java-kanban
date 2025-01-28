@@ -1,5 +1,7 @@
 package main.java.manager;
 
+import main.java.tasks.Epic;
+import main.java.tasks.Subtask;
 import main.java.tasks.Task;
 import main.java.tasks.TaskStatus;
 import org.junit.jupiter.api.Test;
@@ -7,12 +9,13 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+
 class InMemoryHistoryManagerTest {
 
     @Test
     void addHistoryList() {
         Task task = new Task("Test addNewTask", "Test addNewTask description", TaskStatus.NEW);
-        HistoryManager historyManager = new InMemoryHistoryManager();
+        InMemoryHistoryManager historyManager = new InMemoryHistoryManager();
 
         historyManager.add(task);
         final List<Task> history = historyManager.getHistory();
@@ -22,25 +25,39 @@ class InMemoryHistoryManagerTest {
     }
 
     @Test
-    void add_MaxListEquals10() {
-        HistoryManager historyManager = new InMemoryHistoryManager();
-        Task task = new Task("Задача 1", "Описание 1", TaskStatus.NEW);
-        historyManager.add(task);
-        historyManager.add(task);
-        historyManager.add(task);
-        historyManager.add(task);
-        historyManager.add(task);
-        historyManager.add(task);
-        historyManager.add(task);
-        historyManager.add(task);
-        historyManager.add(task);
-        historyManager.add(task);
-        historyManager.add(task);
-        historyManager.add(task);
+    void remove_deleteTaskFromHistory() {
+        Task task1 = new Task("Test addNewTask1", "Test addNewTask description", TaskStatus.NEW);
+        Task task2 = new Task("Test addNewTask2", "Test addNewTask description", TaskStatus.NEW);
+        Task task3 = new Task("Test addNewTask3", "Test addNewTask description", TaskStatus.NEW);
+        task1.setId(1);
+        task2.setId(2);
+        task3.setId(3);
+        Epic epic1 = new Epic("Эпик1", "Описание1");
+        Epic epic2 = new Epic("Эпик2", "Описание2");
+        epic1.setId(4);
+        epic2.setId(5);
+        Subtask subtask1 = new Subtask("Подзадача 1", "Описание 1", TaskStatus.NEW, 4);
+        Subtask subtask2 = new Subtask("Подзадача 2", "Описание 2", TaskStatus.NEW, 4);
+        Subtask subtask3 = new Subtask("Подзадача 3", "Описание 3", TaskStatus.NEW, 5);
+        subtask1.setId(6);
+        subtask2.setId(7);
+        subtask3.setId(8);
+        InMemoryHistoryManager historyManager = new InMemoryHistoryManager();
+        historyManager.add(task1);
+        historyManager.add(epic1);
+        historyManager.add(subtask1);
+        historyManager.add(task2);
+        historyManager.add(subtask2);
+        historyManager.add(epic2);
+        historyManager.add(task3);
+        historyManager.add(subtask3);
 
+        historyManager.remove(2);
+        historyManager.remove(4);
+        historyManager.remove(8);
         final List<Task> history = historyManager.getHistory();
 
         assertNotNull(history, "История не пустая.");
-        assertEquals(10, history.size(), "История не равна 10");
+        assertEquals(5, history.size(), "Задача, подзадача и эпик не удалены.");
     }
 }

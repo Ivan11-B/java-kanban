@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class SubtaskTest {
+
     @Test
     void shouldSubtaskEqualsToId() {
         TaskManager taskManager = Managers.getDefault();
