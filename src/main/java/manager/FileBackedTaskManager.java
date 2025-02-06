@@ -4,7 +4,9 @@ import main.java.exception.FileManagerFileInitializationException;
 import main.java.exception.FileManagerSaveException;
 import main.java.tasks.*;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.List;
@@ -95,7 +97,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         return currentEpic;
     }
 
-    private void save()  {
+    private void save() {
         try (FileWriter fw = new FileWriter(file)) {
             String title = "id,type,name,status,description,epic" + "\n";
             fw.write(title);
@@ -145,39 +147,39 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
     }
 
-    private Task taskFromString(String value)  {
+    private Task taskFromString(String value) {
         String[] taskData = value.trim().split(",");
         TaskType taskType = TaskType.valueOf(taskData[1]);
         switch (taskType) {
-            case TASK :
+            case TASK:
                 Task task = new Task(
-                    Integer.parseInt(taskData[0]),
-                    taskData[2],
-                    taskData[4],
-                    getTaskStatusFromString(taskData[3]));
-                tasks.put(task.getId(),task);
+                        Integer.parseInt(taskData[0]),
+                        taskData[2],
+                        taskData[4],
+                        getTaskStatusFromString(taskData[3]));
+                tasks.put(task.getId(), task);
                 setCounterId(task);
                 return task;
-            case EPIC :
+            case EPIC:
                 Epic epic = new Epic(
-                    Integer.parseInt(taskData[0]),
-                    taskData[2],
-                    taskData[4],
-                    getTaskStatusFromString(taskData[3]));
+                        Integer.parseInt(taskData[0]),
+                        taskData[2],
+                        taskData[4],
+                        getTaskStatusFromString(taskData[3]));
                 epics.put(epic.getId(), epic);
                 setCounterId(epic);
                 return epic;
-            case SUBTASK :
+            case SUBTASK:
                 Subtask subtask = new Subtask(
-                    Integer.parseInt(taskData[0]),
-                    taskData[2],
-                    taskData[4],
-                    getTaskStatusFromString(taskData[3]),
-                    Integer.parseInt(taskData[5]));
+                        Integer.parseInt(taskData[0]),
+                        taskData[2],
+                        taskData[4],
+                        getTaskStatusFromString(taskData[3]),
+                        Integer.parseInt(taskData[5]));
                 subtasks.put(subtask.getId(), subtask);
                 setCounterId(subtask);
                 return subtask;
-            default :
+            default:
                 throw new IllegalStateException("Неизвестное значение: " + taskType);
         }
     }
@@ -198,7 +200,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         };
     }
 
-    public static void main (String[] args) {
+    public static void main(String[] args) {
         File file = new File("save.csv");
         FileBackedTaskManager fileBackedTaskManager1 = new FileBackedTaskManager(new InMemoryHistoryManager(), file);
         Task task11 = new Task("Задача 2", "Описание 11", TaskStatus.NEW);
