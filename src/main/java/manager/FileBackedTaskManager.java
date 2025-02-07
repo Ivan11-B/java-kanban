@@ -1,8 +1,10 @@
 package main.java.manager;
 
-import main.java.exception.FileManagerFileInitializationException;
-import main.java.exception.FileManagerSaveException;
-import main.java.tasks.*;
+import main.java.exception.ManagerSaveException;
+import main.java.tasks.Epic;
+import main.java.tasks.Subtask;
+import main.java.tasks.Task;
+import main.java.tasks.TaskStatus;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -14,7 +16,7 @@ import java.util.List;
 public class FileBackedTaskManager extends InMemoryTaskManager {
     private final File file;
 
-    public FileBackedTaskManager(HistoryManager historyManager, File file) {
+    private FileBackedTaskManager(HistoryManager historyManager, File file) {
         super(historyManager);
         this.file = file;
     }
@@ -102,102 +104,57 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             String title = "id,type,name,status,description,epic" + "\n";
             fw.write(title);
             for (Task task : tasks.values()) {
-                fw.write(taskAsString(task));
+                fw.write(CSVConverter.taskAsString(task));
             }
-            for (Task task : epics.values()) {
-                fw.write(taskAsString(task));
+            for (Epic epic : epics.values()) {
+                fw.write(CSVConverter.taskAsString(epic));
             }
-            for (Task task : subtasks.values()) {
-                fw.write(taskAsString(task));
+            for (Subtask subtask : subtasks.values()) {
+                fw.write(CSVConverter.taskAsString(subtask));
             }
         } catch (IOException e) {
             String errorMessage = "Ошибка при сохранении в файл: " + e.getMessage();
             System.out.println(errorMessage);
-            throw new FileManagerSaveException(errorMessage);
-        }
-    }
-
-    private String taskAsString(Task task) {
-        Class<? extends Task> taskClass = task.getClass();
-        if (taskClass == Epic.class) {
-            return String.format("%s,%s,%s,%s,%s\n", task.getId(), TaskType.EPIC, task.getName(),
-                    task.getStatus(), task.getDescription());
-        } else if (taskClass == Subtask.class) {
-            Subtask subtask = (Subtask) task;
-            return String.format("%s,%s,%s,%s,%s,%s\n", task.getId(), TaskType.SUBTASK,
-                    task.getName(), task.getStatus(), task.getDescription(), subtask.getEpicId());
-        } else {
-            return String.format("%s,%s,%s,%s,%s\n", task.getId(), TaskType.TASK, task.getName(),
-                    task.getStatus(), task.getDescription());
+            throw new ManagerSaveException(errorMessage);
         }
     }
 
     public static FileBackedTaskManager loadFromFile(File file) {
         try {
-            FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(new InMemoryHistoryManager(), file);
+            FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(Managers.getDefaultHistory(), file);
             List<String> allLines = Files.readAllLines(file.toPath(), StandardCharsets.UTF_8);
             for (int i = 1; i < allLines.size(); i++) {
-                fileBackedTaskManager.taskFromString(allLines.get(i));
+                Task task = CSVConverter.taskFromString(allLines.get(i));
+                fileBackedTaskManager.addToMap(task);
+                fileBackedTaskManager.updateCounterId(task);
             }
             return fileBackedTaskManager;
         } catch (IOException e) {
             String errorMessage = "Ошибка при загрузки из файла: " + e.getMessage();
             System.out.println(errorMessage);
-            throw new FileManagerFileInitializationException(errorMessage);
+            throw new ManagerSaveException(errorMessage);
         }
     }
 
-    private Task taskFromString(String value) {
-        String[] taskData = value.trim().split(",");
-        TaskType taskType = TaskType.valueOf(taskData[1]);
-        switch (taskType) {
-            case TASK:
-                Task task = new Task(
-                        Integer.parseInt(taskData[0]),
-                        taskData[2],
-                        taskData[4],
-                        getTaskStatusFromString(taskData[3]));
-                tasks.put(task.getId(), task);
-                setCounterId(task);
-                return task;
-            case EPIC:
-                Epic epic = new Epic(
-                        Integer.parseInt(taskData[0]),
-                        taskData[2],
-                        taskData[4],
-                        getTaskStatusFromString(taskData[3]));
-                epics.put(epic.getId(), epic);
-                setCounterId(epic);
-                return epic;
-            case SUBTASK:
-                Subtask subtask = new Subtask(
-                        Integer.parseInt(taskData[0]),
-                        taskData[2],
-                        taskData[4],
-                        getTaskStatusFromString(taskData[3]),
-                        Integer.parseInt(taskData[5]));
-                subtasks.put(subtask.getId(), subtask);
-                setCounterId(subtask);
-                return subtask;
-            default:
-                throw new IllegalStateException("Неизвестное значение: " + taskType);
+    private void addToMap(Task task) {
+        if (task.getClass() == Task.class) {
+            tasks.put(task.getId(), task);
+        } else if (task.getClass() == Epic.class) {
+            epics.put(task.getId(), (Epic) task);
+        } else {
+            subtasks.put(task.getId(), (Subtask) task);
+            Epic epic = epics.get(((Subtask) task).getEpicId());
+            epic.addSubtaskInEpic(task.getId());
+            updateEpicStatus(epic);
+            updateEpic(epic);
         }
     }
 
-    private void setCounterId(Task task) {
+    private void updateCounterId(Task task) {
         int maxId = task.getId();
         if (maxId > idCounter) {
             idCounter = maxId;
         }
-    }
-
-    private TaskStatus getTaskStatusFromString(String value) {
-        return switch (value) {
-            case "NEW" -> TaskStatus.NEW;
-            case "IN_PROGRESS" -> TaskStatus.IN_PROGRESS;
-            case "DONE" -> TaskStatus.DONE;
-            default -> throw new IllegalStateException("Неизвестное значение: " + value);
-        };
     }
 
     public static void main(String[] args) {

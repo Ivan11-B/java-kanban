@@ -1,5 +1,5 @@
 id,type,name,status,description,epic
 2,TASK,Задача 2,NEW,Описание 21
 3,TASK,Задача 2,NEW,Описание 31
-7,EPIC,Эпик2,NEW,Описание2
-8,SUBTASK,Подзадача3,NEW,Описание3,7
+7,TASK,Эпик2,NEW,Описание2
+8,TASK,Подзадача3,NEW,Описание3
