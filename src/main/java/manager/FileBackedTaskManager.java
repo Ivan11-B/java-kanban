@@ -125,9 +125,16 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             List<String> allLines = Files.readAllLines(file.toPath(), StandardCharsets.UTF_8);
             for (int i = 1; i < allLines.size(); i++) {
                 Task task = CSVConverter.taskFromString(allLines.get(i));
-                fileBackedTaskManager.addToMap(task);
+                if (task instanceof Epic) {
+                    fileBackedTaskManager.addToMap((Epic) task);
+                } else if (task instanceof Subtask) {
+                    fileBackedTaskManager.addToMap((Subtask) task);
+                } else {
+                    fileBackedTaskManager.addToMap(task);
+                }
                 fileBackedTaskManager.updateCounterId(task);
             }
+            fileBackedTaskManager.saveSubtaskInListToEpic();
             return fileBackedTaskManager;
         } catch (IOException e) {
             String errorMessage = "Ошибка при загрузки из файла: " + e.getMessage();
@@ -137,14 +144,21 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     private void addToMap(Task task) {
-        if (task.getClass() == Task.class) {
-            tasks.put(task.getId(), task);
-        } else if (task.getClass() == Epic.class) {
-            epics.put(task.getId(), (Epic) task);
-        } else {
-            subtasks.put(task.getId(), (Subtask) task);
-            Epic epic = epics.get(((Subtask) task).getEpicId());
-            epic.addSubtaskInEpic(task.getId());
+        tasks.put(task.getId(), task);
+    }
+
+    private void addToMap(Epic epic) {
+        epics.put(epic.getId(), epic);
+    }
+
+    private void addToMap(Subtask subtask) {
+        subtasks.put(subtask.getId(), subtask);
+    }
+
+    private void saveSubtaskInListToEpic() {
+        for (Subtask subtask : subtasks.values()) {
+            Epic epic = epics.get(subtask.getEpicId());
+            epic.addSubtaskInEpic(subtask.getId());
             updateEpicStatus(epic);
             updateEpic(epic);
         }
