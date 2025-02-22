@@ -6,6 +6,8 @@ import main.java.tasks.TaskStatus;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
+
 public class SubtaskTest {
 
     @Test
@@ -13,8 +15,8 @@ public class SubtaskTest {
         TaskManager taskManager = Managers.getDefault();
         Epic epic = new Epic("Эпик1", "Описание1");
         taskManager.addEpic(epic);
-        Subtask subtask1 = new Subtask("Подзадача 1", "Описание 1", TaskStatus.NEW, 1);
-        Subtask subtask2 = new Subtask("Подзадача 2", "Описание 2", TaskStatus.NEW, 1);
+        Subtask subtask1 = new Subtask("Подзадача 1", "Описание 1", TaskStatus.NEW, 1, null, Duration.ofMinutes(100));
+        Subtask subtask2 = new Subtask("Подзадача 2", "Описание 2", TaskStatus.NEW, 1, null, Duration.ofMinutes(10));
         subtask1.setId(2);
         subtask2.setId(2);
 

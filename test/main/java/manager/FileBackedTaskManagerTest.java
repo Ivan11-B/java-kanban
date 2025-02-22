@@ -33,7 +33,7 @@ class FileBackedTaskManagerTest extends InMemoryTaskManagerTest {
 
     @Test
     void loadFromFile_saveAndLoadEmptyFile() throws IOException {
-        Task task = new Task("Задача 2", "Описание 11", TaskStatus.NEW);
+        Task task = new Task("Задача 2", "Описание 11", TaskStatus.NEW, null, null);
         task = taskManager.addTask(task);
 
         taskManager.removeTask(task.getId());
@@ -44,14 +44,14 @@ class FileBackedTaskManagerTest extends InMemoryTaskManagerTest {
 
     @Test
     void loadFromFile_loadFromFile() {
-        Task task = new Task("Задача 2", "Описание 11", TaskStatus.NEW);
+        Task task = new Task("Задача 2", "Описание 11", TaskStatus.NEW, null, null);
         taskManager.addTask(task);
-        Task task2 = new Task("Задача 2", "Описание 11", TaskStatus.NEW);
+        Task task2 = new Task("Задача 2", "Описание 11", TaskStatus.NEW, null, null);
         taskManager.addTask(task2);
         Epic epic1 = new Epic("Эпик1", "Описание1");
         taskManager.addEpic(epic1);
-        Subtask subtask1 = new Subtask("Подзадача1", "Описание1", TaskStatus.NEW, 3);
-        Subtask subtask2 = new Subtask("Подзадача2", "Описание2", TaskStatus.NEW, 3);
+        Subtask subtask1 = new Subtask("Подзадача1", "Описание1", TaskStatus.NEW, 3, null, null);
+        Subtask subtask2 = new Subtask("Подзадача2", "Описание2", TaskStatus.NEW, 3, null, null);
         taskManager.addSubtask(subtask1);
         taskManager.addSubtask(subtask2);
 
@@ -79,14 +79,14 @@ class FileBackedTaskManagerTest extends InMemoryTaskManagerTest {
 
     @Test
     void updateCounterId() {
-        Task task = new Task("Задача 2", "Описание 11", TaskStatus.NEW);
+        Task task = new Task("Задача 2", "Описание 11", TaskStatus.NEW, null, null);
         taskManager.addTask(task);
-        Task task2 = new Task("Задача 2", "Описание 11", TaskStatus.NEW);
+        Task task2 = new Task("Задача 2", "Описание 11", TaskStatus.NEW, null, null);
         taskManager.addTask(task2);
 
         FileBackedTaskManager fileBackedTaskManager2 = FileBackedTaskManager.loadFromFile(file);
-        Task task3 = new Task("Задача 2", "Описание 11", TaskStatus.NEW);
-        task3 = taskManager.addTask(task3);
+        Task task3 = new Task("Задача 2", "Описание 11", TaskStatus.NEW, null, null);
+        task3 = fileBackedTaskManager2.addTask(task3);
 
         assertEquals(3, task3.getId(), "Счетчик не обновился");
     }
