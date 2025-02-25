@@ -19,7 +19,7 @@ public class InMemoryTaskManager implements TaskManager {
     private final HistoryManager historyManager;
     private final TreeSet<Task> prioritySet;
     private final Map<LocalDateTime, Boolean> gridYearTo15Minutes;
-    private final int SECTION_LENGTH = 15;
+    public static final int SECTION_LENGTH = 15;
 
     public InMemoryTaskManager(HistoryManager historyManager) {
         this.historyManager = historyManager;
