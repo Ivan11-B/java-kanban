@@ -32,7 +32,7 @@ class FileBackedTaskManagerTest extends InMemoryTaskManagerTest {
     }
 
     @Test
-    void loadFromFile_saveAndLoadEmptyFile() throws IOException {
+    void loadFromFile_saveAndLoadEmptyFile() throws IOException, IllegalAccessException {
         Task task = new Task("Задача 2", "Описание 11", TaskStatus.NEW, null, null);
         task = taskManager.addTask(task);
 
@@ -43,7 +43,7 @@ class FileBackedTaskManagerTest extends InMemoryTaskManagerTest {
     }
 
     @Test
-    void loadFromFile_loadFromFile() {
+    void loadFromFile_loadFromFile() throws IllegalAccessException {
         Task task = new Task("Задача 2", "Описание 11", TaskStatus.NEW, null, null);
         taskManager.addTask(task);
         Task task2 = new Task("Задача 2", "Описание 11", TaskStatus.NEW, null, null);
@@ -78,7 +78,7 @@ class FileBackedTaskManagerTest extends InMemoryTaskManagerTest {
     }
 
     @Test
-    void updateCounterId() {
+    void updateCounterId() throws IllegalAccessException {
         Task task = new Task("Задача 2", "Описание 11", TaskStatus.NEW, null, null);
         taskManager.addTask(task);
         Task task2 = new Task("Задача 2", "Описание 11", TaskStatus.NEW, null, null);

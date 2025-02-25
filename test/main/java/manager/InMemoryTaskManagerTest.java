@@ -26,7 +26,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    void addTask_setNewId() {
+    void addTask_setNewId() throws IllegalAccessException {
         String name = "Задача 1";
         String description = "Описание 1";
         TaskStatus status = TaskStatus.NEW;
@@ -42,7 +42,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    void getTaskById_getTaskEqualsTaskAddInTaskManager() {
+    void getTaskById_getTaskEqualsTaskAddInTaskManager() throws IllegalAccessException {
         Task task = new Task("Задача 1", "Описание 1", TaskStatus.NEW, null, null);
         int taskId = taskManager.addTask(task).getId();
 
@@ -53,7 +53,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    void addSubtask_setNewId() {
+    void addSubtask_setNewId() throws IllegalAccessException {
         String name = "Подзадача 1";
         String description = "Описание 1";
         TaskStatus status = TaskStatus.NEW;
@@ -71,7 +71,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    void getSubTaskById_getSubtaskEqualsSubtaskAddInTaskManager() {
+    void getSubTaskById_getSubtaskEqualsSubtaskAddInTaskManager() throws IllegalAccessException {
         Epic epic = new Epic("Эпик", "Описание");
         taskManager.addEpic(epic);
         Subtask subtask = new Subtask("Задача 1", "Описание 1", TaskStatus.NEW, 1, null, null);
@@ -105,7 +105,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    void getAllTasks_listTasksNotEntry() {
+    void getAllTasks_listTasksNotEntry() throws IllegalAccessException {
         Task task = new Task("Test addNewTask", "Test addNewTask description", TaskStatus.NEW, null, null);
         taskManager.addTask(task);
 
@@ -117,7 +117,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    void getAllSubTasks_listSubtasksNotEntry() {
+    void getAllSubTasks_listSubtasksNotEntry() throws IllegalAccessException {
         Epic epic = new Epic("Эпик", "Описание");
         taskManager.addEpic(epic);
         Subtask subtask = new Subtask("Подзадача 1", "Описание 1", TaskStatus.NEW, 1, null, null);
@@ -148,7 +148,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    void removeTask_deleteTaskFromTaskListAndHistory() {
+    void removeTask_deleteTaskFromTaskListAndHistory() throws IllegalAccessException {
         Task task = new Task("Задача 1", "Описание 1", TaskStatus.NEW, null, null);
         taskManager.addTask(task);
         List<Task> tasks = taskManager.getAllTasks();
@@ -166,7 +166,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    void removeSubtask_deleteSubtaskFromSubtaskListAndHistory() {
+    void removeSubtask_deleteSubtaskFromSubtaskListAndHistory() throws IllegalAccessException {
         Epic epic = new Epic("Эпик", "Описание");
         taskManager.addEpic(epic);
         Subtask subtask = new Subtask("Подзадача 1", "Описание 1", TaskStatus.NEW, 1, null, null);
@@ -206,7 +206,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    void removeAllTask_cleanTaskListAndHistory() {
+    void removeAllTask_cleanTaskListAndHistory() throws IllegalAccessException {
         Task task1 = new Task("Задача 1", "Описание 1", TaskStatus.NEW, null, null);
         taskManager.addTask(task1);
         Task task2 = new Task("Задача 1", "Описание 1", TaskStatus.NEW, null, null);
@@ -223,7 +223,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    void removeAllSubtask_cleanSubtaskListAndHistory() {
+    void removeAllSubtask_cleanSubtaskListAndHistory() throws IllegalAccessException {
         Epic epic = new Epic("Эпик", "Описание");
         taskManager.addEpic(epic);
         Subtask subtask1 = new Subtask("Подзадача 1", "Описание 1", TaskStatus.NEW, 1, null, null);
@@ -243,7 +243,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    void removeAllEpic_cleanEpicListAndHistory() {
+    void removeAllEpic_cleanEpicListAndHistory() throws IllegalAccessException {
         Epic epic1 = new Epic("Эпик", "Описание");
         Epic epic2 = new Epic("Эпик", "Описание");
         taskManager.addEpic(epic1);
@@ -265,7 +265,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    void updateTask_doNothing_taskNotExist() {
+    void updateTask_doNothing_taskNotExist() throws IllegalAccessException {
         Task task1 = new Task("Задача 1", "Описание 1", TaskStatus.NEW, null, null);
         taskManager.addTask(task1);
         Task task2 = new Task("Задача 2", "Описание 2", TaskStatus.NEW, null, null);
@@ -276,7 +276,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    void updateSubtask_doNothing_subtaskNotExist() {
+    void updateSubtask_doNothing_subtaskNotExist() throws IllegalAccessException {
         Epic epic = new Epic("Эпик", "Описание");
         taskManager.addEpic(epic);
         Subtask subtask1 = new Subtask("Подзадача 1", "Описание 1", TaskStatus.NEW, 1, null, null);
@@ -300,7 +300,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    void updateEpicStatus_autoStatusEpicChange() {
+    void updateEpicStatus_autoStatusEpicChange() throws IllegalAccessException {
         Epic epic1 = new Epic("Эпик", "Описание");
         taskManager.addEpic(epic1);
         Subtask subtask1 = new Subtask("Подзадача 1", "Описание 1", TaskStatus.NEW, 1, null, null);
@@ -325,7 +325,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    void shouldTaskByHistoryAfterUpdate() {
+    void shouldTaskByHistoryAfterUpdate() throws IllegalAccessException {
         Task task = new Task("Задача 1", "Описание 1", TaskStatus.NEW, null, null);
         taskManager.addTask(task);
         taskManager.getTaskById(task.getId());
@@ -338,7 +338,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    void removeTimeTaskInGrid_AddToGrid() {
+    void removeTimeTaskInGrid_AddToGrid() throws IllegalAccessException {
         Task task1 = new Task("Задача 1", "Описание 1", TaskStatus.NEW,
                 LocalDateTime.of(2025, 10, 1, 12, 0), Duration.ofMinutes(55));
         Task task2 = new Task("Задача 1", "Описание 1", TaskStatus.NEW,
@@ -352,17 +352,20 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    void removeTimeTaskInGrid_intersectionTime() {
+    void removeTimeTaskInGrid_intersectionTime() throws IllegalAccessException {
         Task task1 = new Task("Задача 1", "Описание 1", TaskStatus.NEW,
                 LocalDateTime.of(2025, 10, 1, 12, 0), Duration.ofMinutes(55));
         Task task2 = new Task("Задача 1", "Описание 1", TaskStatus.NEW,
                 LocalDateTime.of(2025, 10, 1, 12, 10), Duration.ofMinutes(55));
-
         taskManager.addTask(task1);
-        taskManager.addTask(task2);
+        boolean exeptionThrown = false;
 
-        int count = taskManager.getPrioritizedTasks().size();
+        try {
+            taskManager.addTask(task2);
+        } catch (IllegalAccessException e) {
+            exeptionThrown = true;
+        }
 
-        Assertions.assertEquals(1, count, "Список не актуальный");
+        assertTrue(exeptionThrown);
     }
 }

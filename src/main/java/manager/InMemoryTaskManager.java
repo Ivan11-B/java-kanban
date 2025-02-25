@@ -7,7 +7,6 @@ import main.java.tasks.TaskStatus;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -20,6 +19,7 @@ public class InMemoryTaskManager implements TaskManager {
     private final HistoryManager historyManager;
     private final TreeSet<Task> prioritySet;
     private final Map<LocalDateTime, Boolean> gridYearTo15Minutes;
+    private final int SECTION_LENGTH = 15;
 
     public InMemoryTaskManager(HistoryManager historyManager) {
         this.historyManager = historyManager;
@@ -47,7 +47,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public Task addTask(Task task) {
+    public Task addTask(Task task) throws IllegalAccessException {
         try {
             isFreeTimeInGrid(task);
             Task taskInManager = new Task(task);
@@ -58,8 +58,8 @@ public class InMemoryTaskManager implements TaskManager {
             return task;
         } catch (IllegalAccessException e) {
             System.out.println(e.getMessage());
+            throw e;
         }
-        return null;
     }
 
     @Override
@@ -89,8 +89,10 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public Task updateTask(Task task) {
-        if (tasks.containsKey(task.getId())) {
+    public Task updateTask(Task task) throws IllegalAccessException {
+        if (!tasks.containsKey(task.getId())) {
+            return null;
+        } else {
             removeTimeTaskInGrid(tasks.get(task.getId()));
             try {
                 isFreeTimeInGrid(task);
@@ -101,18 +103,17 @@ public class InMemoryTaskManager implements TaskManager {
                 currentTask.setStartTime(task.getStartTime());
                 currentTask.setDuration(task.getDuration());
                 tasks.put(task.getId(), currentTask);
-                return task;
             } catch (IllegalAccessException e) {
+                addTaskInGrid(tasks.get(task.getId()));
                 System.out.println(e.getMessage());
+                throw e;
             }
-        } else {
-            return null;
         }
-        return null;
+        return task;
     }
 
     @Override
-    public Subtask addSubtask(Subtask subtask) {
+    public Subtask addSubtask(Subtask subtask) throws IllegalAccessException {
         try {
             isFreeTimeInGrid(subtask);
             Subtask subtaskInManager = new Subtask(subtask);
@@ -121,17 +122,13 @@ public class InMemoryTaskManager implements TaskManager {
             System.out.println("Добавлена подзадача: " + subtaskInManager.getId());
             Epic epic = epics.get(subtaskInManager.getEpicId());
             epic.addSubtaskInEpic(subtaskInManager.getId());
-            updateEpicStatus(epic);
-            updateStartTimeEpic(epic);
-            updateEndTimeEpic(epic);
-            updateDurationEpic(epic);
-            updateEpic(epic);
+            updateEpicBySubtask(epic);
             subtask.setId(subtaskInManager.getId());
             return subtask;
         } catch (IllegalAccessException e) {
             System.out.println(e.getMessage());
+            throw e;
         }
-        return null;
     }
 
     @Override
@@ -147,8 +144,7 @@ public class InMemoryTaskManager implements TaskManager {
         removeTimeTaskInGrid(subtasks.get(id));
         Epic epic = epics.get(subtasks.get(id).getEpicId());
         epic.removeSubTask(id);
-        updateEpicStatus(epic);
-        updateEpic(epic);
+        updateEpicBySubtask(epic);
         subtasks.remove(id);
         historyManager.remove(id);
         System.out.println("Подзадача удалена!");
@@ -163,15 +159,16 @@ public class InMemoryTaskManager implements TaskManager {
         subtasks.clear();
         epics.values().forEach(epic -> {
             epic.removeAllSubTasks();
-            updateEpicStatus(epic);
-            updateEpic(epic);
+            updateEpicBySubtask(epic);
         });
         System.out.println("Все подзадачи удалены!");
     }
 
     @Override
-    public Subtask updateSubTask(Subtask subtask) {
-        if (subtasks.containsKey(subtask.getId())) {
+    public Subtask updateSubTask(Subtask subtask) throws IllegalAccessException {
+        if (!subtasks.containsKey(subtask.getId())) {
+            return null;
+        } else {
             removeTimeTaskInGrid(subtasks.get(subtask.getId()));
             try {
                 isFreeTimeInGrid(subtask);
@@ -184,19 +181,14 @@ public class InMemoryTaskManager implements TaskManager {
                 currentSubtask.setDuration(subtask.getDuration());
                 subtasks.put(subtask.getId(), currentSubtask);
                 Epic epic = epics.get(currentSubtask.getEpicId());
-                updateEpicStatus(epic);
-                updateStartTimeEpic(epic);
-                updateEndTimeEpic(epic);
-                updateDurationEpic(epic);
-                updateEpic(epic);
+                updateEpicBySubtask(epic);
                 return subtask;
             } catch (IllegalAccessException e) {
+                addTaskInGrid(subtasks.get(subtask.getId()));
                 System.out.println(e.getMessage());
+                throw e;
             }
-        } else {
-            return null;
         }
-        return null;
     }
 
     @Override
@@ -281,27 +273,38 @@ public class InMemoryTaskManager implements TaskManager {
         return historyManager.getHistory();
     }
 
+    protected void updateEpicBySubtask(Epic epic) {
+        updateEpicStatus(epic);
+        updateStartTimeEpic(epic);
+        updateEndTimeEpic(epic);
+        updateDurationEpic(epic);
+        updateEpic(epic);
+    }
+
     protected void updateStartTimeEpic(Epic epic) {
-        Optional<LocalDateTime> startTimeEpic = getSubtasksByEpic(epic.getId()).stream()
-                .map(subtask -> Optional.ofNullable(subtask.getStartTime()))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .min(LocalDateTime::compareTo);
-        startTimeEpic.ifPresent(epic::setStartTime);
+        epic.setStartTime(getSubtasksByEpic(epic.getId()).stream()
+                .map(Task::getStartTime)
+                .filter(Objects::nonNull)
+                .min(LocalDateTime::compareTo)
+                .orElse(null));
     }
 
     protected void updateEndTimeEpic(Epic epic) {
-        Optional<LocalDateTime> endTimeEpic = getSubtasksByEpic(epic.getId()).stream()
-                .map(subtask -> Optional.ofNullable(subtask.getEndTime()))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .max(LocalDateTime::compareTo);
-        endTimeEpic.ifPresent(epic::setEndTime);
+        epic.setEndTime(getSubtasksByEpic(epic.getId()).stream()
+                .map(Task::getEndTime)
+                .filter(Objects::nonNull)
+                .max(LocalDateTime::compareTo)
+                .orElse(null));
     }
 
     protected void updateDurationEpic(Epic epic) {
         if (epic.getStartTime() != null) {
-            epic.setDuration(Duration.between(epic.getStartTime(), epic.getEndTime()));
+            epic.setDuration(getSubtasksByEpic(epic.getId()).stream()
+                    .map(Task::getDuration)
+                    .filter(Objects::nonNull)
+                    .reduce(Duration::plus)
+                    .orElse(null)
+            );
         }
     }
 
@@ -324,12 +327,13 @@ public class InMemoryTaskManager implements TaskManager {
         return grid;
     }
 
-    private boolean isFreeTimeTask(LocalDateTime start, Task task) {
-        while (start.isBefore(task.getEndTime())) {
-            if (!gridYearTo15Minutes.getOrDefault(start, false)) {
+    private boolean isFreeTimeTask(Task task) {
+        LocalDateTime startTime = translateInSection(task);
+        while (startTime.isBefore(task.getEndTime())) {
+            if (!gridYearTo15Minutes.getOrDefault(startTime, false)) {
                 return false;
             }
-            start = start.plusMinutes(15);
+            startTime = startTime.plusMinutes(15);
         }
         return true;
     }
@@ -338,13 +342,18 @@ public class InMemoryTaskManager implements TaskManager {
         if (task.getStartTime() == null) {
             return;
         }
-        LocalDateTime start = translateInSection(task);
-        if (!isFreeTimeTask(start, task)) {
+        if (!isFreeTimeTask(task)) {
             throw new IllegalAccessException("Задачи пересекаются");
+        } else {
+            addTaskInGrid(task);
         }
-        while (start.isBefore(task.getEndTime())) {
-            gridYearTo15Minutes.put(start, false);
-            start = start.plusMinutes(15);
+    }
+
+    private void addTaskInGrid(Task task) {
+        LocalDateTime startTime = translateInSection(task);
+        while (startTime.isBefore(task.getEndTime())) {
+            gridYearTo15Minutes.put(startTime, false);
+            startTime = startTime.plusMinutes(SECTION_LENGTH);
         }
     }
 
@@ -355,16 +364,14 @@ public class InMemoryTaskManager implements TaskManager {
         LocalDateTime start = translateInSection(task);
         while (start.isBefore(task.getEndTime())) {
             gridYearTo15Minutes.put(start, true);
-            start = start.plusMinutes(15);
+            start = start.plusMinutes(SECTION_LENGTH);
         }
     }
 
     private LocalDateTime translateInSection(Task task) {
-        LocalDateTime truncateTime = task.getStartTime().truncatedTo(ChronoUnit.MINUTES);
-        LocalTime timeToMinutes = truncateTime.toLocalTime();
-        int minutes = timeToMinutes.getHour() * 60 + timeToMinutes.getMinute();
-        int section = minutes / 15;
-        LocalDateTime startOfDay = truncateTime.toLocalDate().atStartOfDay();
-        return startOfDay.plusMinutes(section * 15);
+        LocalDateTime startTime = task.getStartTime();
+        LocalDateTime startDay = startTime.truncatedTo(ChronoUnit.DAYS);
+        int numberSection = (startTime.getHour() * 60 + startTime.getMinute()) / SECTION_LENGTH;
+        return startDay.plusMinutes(numberSection * SECTION_LENGTH);
     }
 }

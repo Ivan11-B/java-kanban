@@ -16,7 +16,7 @@ public interface TaskManager {
 
     List<Epic> getAllEpics();
 
-    Task addTask(Task task);
+    Task addTask(Task task) throws IllegalAccessException;
 
     Optional<Task> getTaskById(Integer id);
 
@@ -24,9 +24,9 @@ public interface TaskManager {
 
     void removeAllTasks();
 
-    Task updateTask(Task task);
+    Task updateTask(Task task) throws IllegalAccessException;
 
-    Subtask addSubtask(Subtask subtask);
+    Subtask addSubtask(Subtask subtask) throws IllegalAccessException;
 
     Optional<Subtask> getSubTaskById(Integer id);
 
@@ -34,7 +34,7 @@ public interface TaskManager {
 
     void removeAllSubtasks();
 
-    Subtask updateSubTask(Subtask subtask);
+    Subtask updateSubTask(Subtask subtask) throws IllegalAccessException;
 
     Epic addEpic(Epic epic);
 

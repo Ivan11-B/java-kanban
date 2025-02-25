@@ -41,56 +41,44 @@ public class CSVConverter {
 
     public static Task taskFromString(String value) {
         String[] taskData = value.trim().split(",");
-        LocalDateTime formattedStartTime;
-        Duration duration;
         TaskType taskType = TaskType.valueOf(taskData[1]);
-        switch (taskType) {
-            case TASK: {
-                if (taskData[5].equals("null")) {
-                    formattedStartTime = null;
-                } else {
-                    formattedStartTime = LocalDateTime.parse(taskData[5], Task.FORMATTER);
-                }
-                if (taskData[6].equals("null")) {
-                    duration = null;
-                } else {
-                    duration = Duration.ofMinutes(Integer.parseInt(taskData[6]));
-                }
-                return new Task(
-                        Integer.parseInt(taskData[0]),
-                        taskData[2],
-                        taskData[4],
-                        TaskStatus.valueOf(taskData[3]),
-                        formattedStartTime,
-                        duration);
-            }
-            case EPIC:
-                return new Epic(
-                        Integer.parseInt(taskData[0]),
-                        taskData[2],
-                        taskData[4],
-                        TaskStatus.valueOf(taskData[3]));
-            case SUBTASK: {
-                if (taskData[6].equals("null")) {
-                    formattedStartTime = null;
-                } else {
-                    formattedStartTime = LocalDateTime.parse(taskData[6], Task.FORMATTER);
-                }
-                if (taskData[7].equals("null")) {
-                    duration = null;
-                } else {
-                    duration = Duration.ofMinutes(Integer.parseInt(taskData[7]));
-                }
-                return new Subtask(
-                        Integer.parseInt(taskData[0]),
-                        taskData[2],
-                        taskData[4],
-                        TaskStatus.valueOf(taskData[3]),
-                        Integer.parseInt(taskData[5]),
-                        formattedStartTime,
-                        duration);
-            }
+        return switch (taskType) {
+            case TASK -> new Task(
+                    Integer.parseInt(taskData[0]),
+                    taskData[2],
+                    taskData[4],
+                    TaskStatus.valueOf(taskData[3]),
+                    getStartTime(taskData[5]),
+                    getDuration(taskData[6]));
+            case EPIC -> new Epic(
+                    Integer.parseInt(taskData[0]),
+                    taskData[2],
+                    taskData[4],
+                    TaskStatus.valueOf(taskData[3]));
+            case SUBTASK -> new Subtask(
+                    Integer.parseInt(taskData[0]),
+                    taskData[2],
+                    taskData[4],
+                    TaskStatus.valueOf(taskData[3]),
+                    Integer.parseInt(taskData[5]),
+                    getStartTime(taskData[6]),
+                    getDuration(taskData[7]));
+        };
+    }
+
+    private static LocalDateTime getStartTime(String time) {
+        if (time.equals("null")) {
+            return null;
+        } else {
+            return LocalDateTime.parse(time, Task.FORMATTER);
         }
-        return null;
+    }
+
+    private static Duration getDuration(String time) {
+        if (time.equals("null")) {
+            return null;
+        } else {
+            return Duration.ofMinutes(Integer.parseInt(time));
+        }
     }
 }

@@ -1,5 +1,5 @@
 id,type,name,status,description,epic
 1,TASK,Задача 1,NEW,Описание 1,null,null
 2,EPIC,Эпик1,NEW,Описание1
-3,SUBTASK,Подзадача3,NEW,Описание3,2,null,100
+3,SUBTASK,Подзадача3,NEW,Описание3,2,12.10.2025 14:00:00,100
 4,SUBTASK,Подзадача3,NEW,Описание3,2,01.10.2025 14:00:00,100
