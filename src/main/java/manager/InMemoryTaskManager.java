@@ -1,5 +1,6 @@
 package main.java.manager;
 
+import main.java.exception.TimeOverlapException;
 import main.java.tasks.Epic;
 import main.java.tasks.Subtask;
 import main.java.tasks.Task;
@@ -47,18 +48,17 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public Task addTask(Task task) throws IllegalAccessException {
+    public Task addTask(Task task) {
         try {
-            isFreeTimeInGrid(task);
+            checkTimeInterceptionAndUpdateGrid(task);
             Task taskInManager = new Task(task);
             taskInManager.setId(getNextId());
             tasks.put(taskInManager.getId(), taskInManager);
             System.out.println("Добавлена задача: " + taskInManager.getId());
             task.setId(taskInManager.getId());
             return task;
-        } catch (IllegalAccessException e) {
-            System.out.println(e.getMessage());
-            throw e;
+        } catch (TimeOverlapException e) {
+            throw new RuntimeException("Ошибка при добавлении задачи", e);
         }
     }
 
@@ -72,7 +72,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeTask(Integer id) {
-        removeTimeTaskInGrid(tasks.get(id));
+        removeTimeTaskFromGrid(tasks.get(id));
         tasks.remove(id);
         historyManager.remove(id);
         System.out.println("Задача удалена!");
@@ -83,39 +83,37 @@ public class InMemoryTaskManager implements TaskManager {
         tasks.values().stream()
                 .map(Task::getId)
                 .forEach(historyManager::remove);
-        tasks.values().forEach(this::removeTimeTaskInGrid);
+        tasks.values().forEach(this::removeTimeTaskFromGrid);
         tasks.clear();
         System.out.println("Все задачи удалены!");
     }
 
     @Override
-    public Task updateTask(Task task) throws IllegalAccessException {
+    public Task updateTask(Task task) {
         if (!tasks.containsKey(task.getId())) {
             return null;
-        } else {
-            removeTimeTaskInGrid(tasks.get(task.getId()));
-            try {
-                isFreeTimeInGrid(task);
-                Task currentTask = tasks.get(task.getId());
-                currentTask.setName(task.getName());
-                currentTask.setDescription(task.getDescription());
-                currentTask.setStatus(task.getStatus());
-                currentTask.setStartTime(task.getStartTime());
-                currentTask.setDuration(task.getDuration());
-                tasks.put(task.getId(), currentTask);
-            } catch (IllegalAccessException e) {
-                addTaskInGrid(tasks.get(task.getId()));
-                System.out.println(e.getMessage());
-                throw e;
-            }
+        }
+        removeTimeTaskFromGrid(tasks.get(task.getId()));
+        try {
+            checkTimeInterceptionAndUpdateGrid(task);
+            Task currentTask = tasks.get(task.getId());
+            currentTask.setName(task.getName());
+            currentTask.setDescription(task.getDescription());
+            currentTask.setStatus(task.getStatus());
+            currentTask.setStartTime(task.getStartTime());
+            currentTask.setDuration(task.getDuration());
+            tasks.put(task.getId(), currentTask);
+        } catch (TimeOverlapException e) {
+            addTimeTaskInGrid(tasks.get(task.getId()));
+            throw new RuntimeException("Ошибка при обновлении задачи", e);
         }
         return task;
     }
 
     @Override
-    public Subtask addSubtask(Subtask subtask) throws IllegalAccessException {
+    public Subtask addSubtask(Subtask subtask) {
         try {
-            isFreeTimeInGrid(subtask);
+            checkTimeInterceptionAndUpdateGrid(subtask);
             Subtask subtaskInManager = new Subtask(subtask);
             subtaskInManager.setId(getNextId());
             subtasks.put(subtaskInManager.getId(), subtaskInManager);
@@ -125,9 +123,8 @@ public class InMemoryTaskManager implements TaskManager {
             updateEpicBySubtask(epic);
             subtask.setId(subtaskInManager.getId());
             return subtask;
-        } catch (IllegalAccessException e) {
-            System.out.println(e.getMessage());
-            throw e;
+        } catch (TimeOverlapException e) {
+            throw new RuntimeException("Ошибка при добавлении подзадачи", e);
         }
     }
 
@@ -141,7 +138,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeSubtask(Integer id) {
-        removeTimeTaskInGrid(subtasks.get(id));
+        removeTimeTaskFromGrid(subtasks.get(id));
         Epic epic = epics.get(subtasks.get(id).getEpicId());
         epic.removeSubTask(id);
         updateEpicBySubtask(epic);
@@ -155,7 +152,7 @@ public class InMemoryTaskManager implements TaskManager {
         subtasks.values().stream()
                 .map(Task::getId)
                 .forEach(historyManager::remove);
-        subtasks.values().forEach(this::removeTimeTaskInGrid);
+        subtasks.values().forEach(this::removeTimeTaskFromGrid);
         subtasks.clear();
         epics.values().forEach(epic -> {
             epic.removeAllSubTasks();
@@ -165,13 +162,13 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public Subtask updateSubTask(Subtask subtask) throws IllegalAccessException {
+    public Subtask updateSubTask(Subtask subtask) {
         if (!subtasks.containsKey(subtask.getId())) {
             return null;
         } else {
-            removeTimeTaskInGrid(subtasks.get(subtask.getId()));
+            removeTimeTaskFromGrid(subtasks.get(subtask.getId()));
             try {
-                isFreeTimeInGrid(subtask);
+                checkTimeInterceptionAndUpdateGrid(subtask);
                 Subtask currentSubtask = subtasks.get(subtask.getId());
                 currentSubtask.setName(subtask.getName());
                 currentSubtask.setDescription(subtask.getDescription());
@@ -183,10 +180,9 @@ public class InMemoryTaskManager implements TaskManager {
                 Epic epic = epics.get(currentSubtask.getEpicId());
                 updateEpicBySubtask(epic);
                 return subtask;
-            } catch (IllegalAccessException e) {
-                addTaskInGrid(subtasks.get(subtask.getId()));
-                System.out.println(e.getMessage());
-                throw e;
+            } catch (TimeOverlapException e) {
+                addTimeTaskInGrid(subtasks.get(subtask.getId()));
+                throw new RuntimeException("Ошибка при обновлении подзадачи", e);
             }
         }
     }
@@ -327,8 +323,8 @@ public class InMemoryTaskManager implements TaskManager {
         return grid;
     }
 
-    private boolean isFreeTimeTask(Task task) {
-        LocalDateTime startTime = translateInSection(task);
+    private boolean isTimeTaskFreeInGrid(Task task) {
+        LocalDateTime startTime = translateTaskTimeInTimeGrid(task);
         while (startTime.isBefore(task.getEndTime())) {
             if (!gridYearTo15Minutes.getOrDefault(startTime, false)) {
                 return false;
@@ -338,37 +334,37 @@ public class InMemoryTaskManager implements TaskManager {
         return true;
     }
 
-    protected void isFreeTimeInGrid(Task task) throws IllegalAccessException {
+    protected void checkTimeInterceptionAndUpdateGrid(Task task) throws TimeOverlapException {
         if (task.getStartTime() == null) {
             return;
         }
-        if (!isFreeTimeTask(task)) {
-            throw new IllegalAccessException("Задачи пересекаются");
+        if (!isTimeTaskFreeInGrid(task)) {
+            throw new TimeOverlapException("Наложение временных отрезков");
         } else {
-            addTaskInGrid(task);
+            addTimeTaskInGrid(task);
         }
     }
 
-    private void addTaskInGrid(Task task) {
-        LocalDateTime startTime = translateInSection(task);
+    private void addTimeTaskInGrid(Task task) {
+        LocalDateTime startTime = translateTaskTimeInTimeGrid(task);
         while (startTime.isBefore(task.getEndTime())) {
             gridYearTo15Minutes.put(startTime, false);
             startTime = startTime.plusMinutes(SECTION_LENGTH);
         }
     }
 
-    private void removeTimeTaskInGrid(Task task) {
+    private void removeTimeTaskFromGrid(Task task) {
         if (task.getStartTime() == null) {
             return;
         }
-        LocalDateTime start = translateInSection(task);
-        while (start.isBefore(task.getEndTime())) {
-            gridYearTo15Minutes.put(start, true);
-            start = start.plusMinutes(SECTION_LENGTH);
+        LocalDateTime startTime = translateTaskTimeInTimeGrid(task);
+        while (startTime.isBefore(task.getEndTime())) {
+            gridYearTo15Minutes.put(startTime, true);
+            startTime = startTime.plusMinutes(SECTION_LENGTH);
         }
     }
 
-    private LocalDateTime translateInSection(Task task) {
+    private LocalDateTime translateTaskTimeInTimeGrid(Task task) {
         LocalDateTime startTime = task.getStartTime();
         LocalDateTime startDay = startTime.truncatedTo(ChronoUnit.DAYS);
         int numberSection = (startTime.getHour() * 60 + startTime.getMinute()) / SECTION_LENGTH;

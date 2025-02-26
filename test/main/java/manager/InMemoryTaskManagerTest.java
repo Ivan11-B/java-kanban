@@ -362,7 +362,7 @@ class InMemoryTaskManagerTest {
 
         try {
             taskManager.addTask(task2);
-        } catch (IllegalAccessException e) {
+        } catch (RuntimeException e) {
             exeptionThrown = true;
         }
 

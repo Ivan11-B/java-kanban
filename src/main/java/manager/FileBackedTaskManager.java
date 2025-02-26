@@ -24,7 +24,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     @Override
-    public Task addTask(Task task) throws IllegalAccessException {
+    public Task addTask(Task task) {
         Task currentTask = super.addTask(task);
         save();
         return currentTask;
@@ -43,14 +43,14 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     @Override
-    public Task updateTask(Task task) throws IllegalAccessException {
+    public Task updateTask(Task task) {
         Task currentTask = super.updateTask(task);
         save();
         return currentTask;
     }
 
     @Override
-    public Subtask addSubtask(Subtask subtask) throws IllegalAccessException {
+    public Subtask addSubtask(Subtask subtask) {
         Subtask currrentSubtask = super.addSubtask(subtask);
         save();
         return currrentSubtask;
@@ -69,7 +69,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     @Override
-    public Subtask updateSubTask(Subtask subtask) throws IllegalAccessException {
+    public Subtask updateSubTask(Subtask subtask) {
         Subtask currrentSubtask = super.updateSubTask(subtask);
         save();
         return currrentSubtask;
@@ -190,18 +190,18 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         fileBackedTaskManager1.addSubtask(subtask3);
 
         Subtask subtask1 = new Subtask("Подзадача3", "Описание3", TaskStatus.NEW, 2,
-                LocalDateTime.of(2025, 10, 1, 14, 0), Duration.ofMinutes(100));
+                LocalDateTime.of(2025, 10, 12, 12, 0), Duration.ofMinutes(100));
         fileBackedTaskManager1.addSubtask(subtask1);
 
         Subtask subtask11 = new Subtask("Подзадача3", "Описание3", TaskStatus.NEW, 2,
-                LocalDateTime.of(2025, 10, 12, 14, 0), Duration.ofMinutes(100));
+                LocalDateTime.of(2025, 10, 12, 12, 10), Duration.ofMinutes(100));
         subtask11.setId(3);
 
         fileBackedTaskManager1.updateSubTask(subtask11);
 
         FileBackedTaskManager fileBackedTaskManager2 = FileBackedTaskManager.loadFromFile(file);
-//        System.out.println(fileBackedTaskManager2.getAllTasks());
-//        System.out.println(fileBackedTaskManager2.getAllSubTasks());
+        System.out.println(fileBackedTaskManager2.getAllTasks());
+        System.out.println(fileBackedTaskManager2.getAllSubTasks());
         System.out.println(fileBackedTaskManager2.getAllEpics());
         System.out.println(fileBackedTaskManager2.getPrioritizedTasks());
     }
