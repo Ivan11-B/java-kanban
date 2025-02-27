@@ -11,6 +11,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
@@ -160,6 +162,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             Epic epic = epics.get(subtask.getEpicId());
             epic.addSubtaskInEpic(subtask.getId());
             updateEpicStatus(epic);
+            updateStartTimeEpic(epic);
+            updateEndTimeEpic(epic);
+            updateDurationEpic(epic);
             updateEpic(epic);
         }
     }
@@ -171,29 +176,34 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IllegalAccessException {
         File file = new File("save.csv");
         FileBackedTaskManager fileBackedTaskManager1 = new FileBackedTaskManager(new InMemoryHistoryManager(), file);
-        Task task11 = new Task("Задача 2", "Описание 11", TaskStatus.NEW);
-        fileBackedTaskManager1.addTask(task11);
-        Task task21 = new Task("Задача 2", "Описание 21", TaskStatus.NEW);
-        fileBackedTaskManager1.addTask(task21);
-        Task task31 = new Task("Задача 2", "Описание 31", TaskStatus.NEW);
-        fileBackedTaskManager1.addTask(task31);
+
+        Task task1 = new Task("Задача 1", "Описание 1", TaskStatus.NEW, null, null);
+        fileBackedTaskManager1.addTask(task1);
         Epic epic1 = new Epic("Эпик1", "Описание1");
         fileBackedTaskManager1.addEpic(epic1);
-        Subtask subtask1 = new Subtask("Подзадача1", "Описание1", TaskStatus.NEW, 4);
-        Subtask subtask2 = new Subtask("Подзадача2", "Описание2", TaskStatus.NEW, 4);
-        fileBackedTaskManager1.addSubtask(subtask1);
-        fileBackedTaskManager1.addSubtask(subtask2);
-        Epic epic2 = new Epic("Эпик2", "Описание2");
-        fileBackedTaskManager1.addEpic(epic2);
-        Subtask subtask3 = new Subtask("Подзадача3", "Описание3", TaskStatus.NEW, 7);
+
+        Subtask subtask3 = new Subtask("Подзадача3", "Описание3", TaskStatus.NEW, 2,
+                LocalDateTime.of(2025, 10, 1, 12, 0), Duration.ofMinutes(55));
         fileBackedTaskManager1.addSubtask(subtask3);
-        fileBackedTaskManager1.removeEpic(4);
+
+        Subtask subtask1 = new Subtask("Подзадача3", "Описание3", TaskStatus.NEW, 2,
+                LocalDateTime.of(2025, 10, 12, 12, 0), Duration.ofMinutes(100));
+        fileBackedTaskManager1.addSubtask(subtask1);
+
+        Subtask subtask11 = new Subtask("Подзадача3", "Описание3", TaskStatus.NEW, 2,
+                LocalDateTime.of(2025, 10, 12, 12, 10), Duration.ofMinutes(100));
+        subtask11.setId(3);
+
+        fileBackedTaskManager1.updateSubTask(subtask11);
 
         FileBackedTaskManager fileBackedTaskManager2 = FileBackedTaskManager.loadFromFile(file);
-        fileBackedTaskManager2.removeTask(1);
+        System.out.println(fileBackedTaskManager2.getAllTasks());
+        System.out.println(fileBackedTaskManager2.getAllSubTasks());
+        System.out.println(fileBackedTaskManager2.getAllEpics());
+        System.out.println(fileBackedTaskManager2.getPrioritizedTasks());
     }
 }
 
