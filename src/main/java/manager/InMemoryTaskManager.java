@@ -112,6 +112,10 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Subtask addSubtask(Subtask subtask) {
+        if (!epics.containsKey(subtask.getEpicId())) {
+            System.out.println("Эпика с Id: " + subtask.getEpicId() + " нет");
+            return null;
+        }
         try {
             checkTimeInterceptionAndUpdateGrid(subtask);
             Subtask subtaskInManager = new Subtask(subtask);
@@ -305,6 +309,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     public Set<Task> getPrioritizedTasks() {
+        prioritySet.clear();
         prioritySet.addAll(tasks.values().stream()
                 .filter(task -> task.getStartTime() != null)
                 .toList());
